@@ -1,0 +1,405 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Arial;}}
+
+\qcs32 BenSrv.java0\par
+\qls24
+package ration.service;\par
+import java.util.List;\par
+import ration.model.Ben;\par
+\par
+public interface BenSrv \{\par
+    boolean add(Ben p);\par
+    Ben add(String name, String addr, String ph, int age, boolean main);\par
+    boolean update(int id, String name, String addr, String ph);\par
+    Ben get(int id);\par
+    List<Ben> getAll();\par
+    void showAll();\par
+\par
+
+\qcs32 BenSrvImpl.java0\par
+\qls24
+package ration.service;\par
+import java.util.ArrayList;\par
+import java.util.HashMap;\par
+import java.util.List;\par
+import java.util.Map;\par
+import ration.model.Ben;\par
+\par
+public class BenSrvImpl implements BenSrv \{\par
+    private Map<Integer, Ben> people;\par
+    \par
+    public BenSrvImpl() \{\par
+        people = new HashMap<>();\par
+    \}\par
+    \par
+    public boolean add(Ben p) \{\par
+        if (p == null) \{\par
+            return false;\par
+        \}\par
+        people.put(p.getId(), p);\par
+        return true;\par
+    \}\par
+    \par
+    @Override\par
+    public Ben add(String name, String addr, String ph, int age, boolean main) \{\par
+        if (name == null || name.trim().isEmpty()) \{\par
+            System.out.println("Error: Name empty");\par
+            return null;\par
+        \}\par
+        \par
+        Ben p = new Ben(name, addr, ph, age, main);\par
+        people.put(p.getId(), p);\par
+        return p;\par
+    \}\par
+    \par
+    @Override\par
+    public boolean update(int id, String name, String addr, String ph) \{\par
+        Ben p = get(id);\par
+        if (p == null) \{\par
+            System.out.println("Error: ID not found: " + id);\par
+            return false;\par
+        \}\par
+        \par
+        if (name != null && !name.trim().isEmpty()) \{\par
+            p.setName(name);\par
+        \}\par
+        \par
+        if (addr != null) \{\par
+            p.setAddr(addr);\par
+        \}\par
+        \par
+        if (ph != null) \{\par
+            p.setPhone(ph);\par
+        \}\par
+        \par
+        return true;\par
+    \}\par
+    \par
+    @Override\par
+    public Ben get(int id) \{\par
+        return people.get(id);\par
+    \}\par
+    \par
+    @Override\par
+    public List<Ben> getAll() \{\par
+        return new ArrayList<>(people.values());\par
+    \}\par
+    \par
+    @Override\par
+    public void showAll() \{\par
+        if (people.isEmpty()) \{\par
+            System.out.println("No people in system");\par
+            return;\par
+        \}\par
+        \par
+        System.out.println("
+----- PEOPLE -----");\par
+        for (Ben p : people.values()) \{\par
+            System.out.println(p.toString());\par
+        \}\par
+    \}\par
+\par
+    public boolean add(Object p) \{\par
+        throw new UnsupportedOperationException("Not supported yet.");\par
+    \}\par
+\par
+
+\qcs32 CardService.java0\par
+\qls24
+package ration.service;\par
+import ration.model.Ben;\par
+import ration.model.Card;\par
+\par
+public interface CardService \{\par
+    \par
+    Card newCard(String type);\par
+    \par
+    boolean addMember(String cardId, Ben person);\par
+    \par
+    Card findCard(String cardId);\par
+    \par
+    boolean changeType(String cardId, String type);\par
+    \par
+    void showAll();\par
+    \par
+    int count();\par
+\par
+
+\qcs32 Cards.java0\par
+\qls24
+package ration.service;\par
+import java.util.HashMap;\par
+import java.util.Map;\par
+import ration.model.Ben;\par
+import ration.model.Card;\par
+\par
+public class Cards implements CardService \{\par
+    private Map<String, Card> cards;\par
+    \par
+    public Cards() \{\par
+        this.cards = new HashMap<>();\par
+    \}\par
+    \par
+    @Override\par
+    public Card newCard(String type) \{\par
+        if (!isValidType(type)) \{\par
+            System.out.println("Error: Invalid type. Use APL, BPL, or AAY.");\par
+            return null;\par
+        \}\par
+        \par
+        Card card = new Card(type);\par
+        cards.put(card.getId(), card);  \par
+        \par
+        return card;\par
+    \}\par
+    \par
+    @Override\par
+    public boolean addMember(String cardId, Ben person) \{  \par
+        Card card = findCard(cardId);\par
+        if (card == null) \{\par
+            System.out.println("Error: Card not found: " + cardId);\par
+            return false;\par
+        \}\par
+        \par
+        card.addMember(person);  \par
+        return true;\par
+    \}\par
+    \par
+    @Override\par
+    public Card findCard(String cardId) \{  \par
+        return cards.get(cardId);\par
+    \}\par
+    \par
+    @Override\par
+    public boolean changeType(String cardId, String type) \{\par
+        if (!isValidType(type)) \{\par
+            System.out.println("Error: Invalid type. Use APL, BPL, or AAY.");\par
+            return false;\par
+        \}\par
+        \par
+        Card card = findCard(cardId);  \par
+        if (card == null) \{\par
+            System.out.println("Error: Card not found: " + cardId);\par
+            return false;\par
+        \}\par
+        \par
+        card.setType(type);  \par
+        return true;\par
+    \}\par
+    \par
+    @Override\par
+    public void showAll() \{\par
+        if (cards.isEmpty()) \{\par
+            System.out.println("No cards in the system.");\par
+            return;\par
+        \}\par
+        \par
+        System.out.println("
+----- ALL CARDS -----");\par
+        for (Card card : cards.values()) \{  \par
+            System.out.println(card.getId() + " - Type: " + card.getType() +  \par
+                              " - Members: " + card.getCount());  \par
+        \}\par
+    \}\par
+    \par
+    @Override\par
+    public int count() \{\par
+        return cards.size();\par
+    \}\par
+    \par
+    private boolean isValidType(String type) \{\par
+        return type != null && (\par
+            type.equals(Card.TYPE_APL) ||  \par
+            type.equals(Card.TYPE_BPL) || \par
+            type.equals(Card.TYPE_AAY)    \par
+        );\par
+    \}\par
+\par
+
+\qcs32 Inventory.java0\par
+\qls24
+package ration.service;\par
+\par
+import java.util.ArrayList;\par
+import java.util.HashMap;\par
+import java.util.List;\par
+import java.util.Map;\par
+import ration.model.Item;\par
+\par
+public class Inventory implements InventoryService \{\par
+    \par
+    private Map<String, Item> stock;\par
+    \par
+    public Inventory() \{\par
+        this.stock = new HashMap<>();\par
+        setupItems();\par
+    \}\par
+    \par
+    @Override\par
+    public boolean add(Item item) \{\par
+        if (item == null) \{\par
+            return false;\par
+        \}\par
+        \par
+        for (Item existing : stock.values()) \{\par
+            if (existing.getName().equalsIgnoreCase(item.getName())) \{\par
+                System.out.println("Error: Item with name '" + item.getName() + "' already exists.");\par
+                return false;\par
+            \}\par
+        \}\par
+        \par
+        stock.put(item.getId(), item);  \par
+        return true;\par
+    \}\par
+    \par
+    @Override\par
+    public Item add(String name, double price, double qty, String unit) \{\par
+        if (name == null || name.trim().isEmpty()) \{\par
+            System.out.println("Error: Item name cannot be empty.");\par
+            return null;\par
+        \}\par
+        \par
+        for (Item item : stock.values()) \{\par
+            if (item.getName().equalsIgnoreCase(name)) \{\par
+                System.out.println("Error: Item with name '" + name + "' already exists.");\par
+                return null;\par
+            \}\par
+        \}\par
+        \par
+        Item newItem = new Item(name, price, qty, unit);\par
+        stock.put(newItem.getId(), newItem);  \par
+        \par
+        return newItem;\par
+    \}\par
+    \par
+    @Override\par
+    public boolean update(String id, String name, double price, double qty, String unit) \{\par
+        Item item = getItem(id);\par
+        if (item == null) \{\par
+            System.out.println("Error: Item not found: " + id);\par
+            return false;\par
+        \}\par
+        \par
+        if (name != null && !name.trim().isEmpty()) \{\par
+            item.setName(name);\par
+        \}\par
+        \par
+        if (price >= 0) \{  // Fixed: allow zero prices\par
+            item.setPrice(price);\par
+        \}\par
+        \par
+        if (qty >= 0) \{\par
+            item.setQuantity(qty);\par
+        \}\par
+        \par
+        if (unit != null && !unit.trim().isEmpty()) \{\par
+            item.setUnit(unit);\par
+        \}\par
+        \par
+        return true;\par
+    \}\par
+    \par
+    @Override\par
+    public boolean updateQty(String id, double qty) \{\par
+        Item item = getItem(id);\par
+        if (item == null) \{\par
+            System.out.println("Error: Item not found: " + id);\par
+            return false;\par
+        \}\par
+        \par
+        item.update(qty);  \par
+        return true;\par
+    \}\par
+    \par
+    @Override\par
+    public Item getItem(String id) \{\par
+        return stock.get(id);\par
+    \}\par
+    \par
+    @Override\par
+    public Item findByName(String name) \{\par
+        if (name == null) \{\par
+            return null;\par
+        \}\par
+        \par
+        for (Item item : stock.values()) \{\par
+            if (item.getName().equalsIgnoreCase(name)) \{\par
+                return item;\par
+            \}\par
+        \}\par
+        \par
+        return null;\par
+    \}\par
+    \par
+    @Override\par
+    public List<Item> getAll() \{\par
+        return new ArrayList<>(stock.values());\par
+    \}\par
+    \par
+    @Override\par
+    public boolean distribute(String id, double qty) \{\par
+        Item item = getItem(id);\par
+        if (item == null) \{\par
+            System.out.println("Error: Item not found: " + id);\par
+            return false;\par
+        \}\par
+        \par
+        if (!item.hasEnough(qty)) \{  \par
+            System.out.println("Error: Not enough " + item.getName() + " in stock");\par
+            System.out.println("Requested: " + qty + " " + item.getUnit() + \par
+                              ", Available: " + item.getQuantity() + " " + item.getUnit());\par
+            return false;\par
+        \}\par
+        \par
+        return item.reduce(qty);  \par
+    \}\par
+    \par
+    @Override\par
+    public void showAll() \{\par
+        if (stock.isEmpty()) \{\par
+            System.out.println("No items in stock.");\par
+            return;\par
+        \}\par
+        \par
+        System.out.println("
+----- STOCK ITEMS -----");\par
+        for (Item item : stock.values()) \{\par
+            System.out.println(item.toString());\par
+        \}\par
+    \}\par
+    \par
+    private void setupItems() \{\par
+        add("Rice", 3.0, 1000.0, "kg");\par
+        add("Wheat", 2.0, 1000.0, "kg");\par
+        add("Sugar", 15.0, 500.0, "kg");\par
+        add("Salt", 5.0, 200.0, "kg");\par
+        add("Kerosene", 20.0, 500.0, "liter");\par
+    \}\par
+\par
+
+\qcs32 InventoryService.java0\par
+\qls24
+package ration.service;\par
+import java.util.List;\par
+import ration.model.Item;\par
+\par
+public interface InventoryService \{\par
+    boolean add(Item item);\par
+    \par
+    Item add(String name, double price, double qty, String unit);\par
+    \par
+    boolean update(String id, String name, double price, double qty, String unit);\par
+    \par
+    boolean updateQty(String id, double qty);\par
+    \par
+    Item getItem(String id);\par
+    \par
+    Item findByName(String name);\par
+    \par
+    List<Item> getAll();\par
+    \par
+    boolean distribute(String id, double qty);\par
+    \par
+    void showAll();\par
+\par
+}

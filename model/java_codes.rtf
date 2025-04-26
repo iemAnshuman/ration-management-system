@@ -1,0 +1,659 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Arial;}}
+
+\qcs32 Admin.java0\par
+\qls24
+package ration.model;\par
+\par
+public class Admin extends Person \{\par
+    private String empId;\par
+    private String role;\par
+    \par
+    public Admin() \{\par
+        super();\par
+    \}\par
+    \par
+    public Admin(String name, String addr, String phone, String empId, String role) \{\par
+        super(name, addr, phone);\par
+        this.empId = empId;\par
+        this.role = role;\par
+    \}\par
+    \par
+    @Override\par
+    public void display() \{\par
+        System.out.println("Admin Data:");\par
+        System.out.println(super.toString());\par
+        System.out.println("ID: " + empId);\par
+        System.out.println("Role: " + role);\par
+    \}\par
+    \par
+    public String getEmpId() \{\par
+        return empId;\par
+    \}\par
+    \par
+    public void setEmpId(String empId) \{\par
+        this.empId = empId;\par
+    \}\par
+    \par
+    public String getRole() \{\par
+        return role;\par
+    \}\par
+    \par
+    public void setRole(String role) \{\par
+        this.role = role;\par
+    \}\par
+\par
+
+\qcs32 Ben.java0\par
+\qls24
+package ration.model;\par
+\par
+public class Ben extends Person \{\par
+    private String cardId;\par
+    private int age;\par
+    private boolean isHead;\par
+    \par
+    public Ben() \{\par
+        super();\par
+    \}\par
+    \par
+    public Ben(String name, String address, String phone, int age, boolean isHead) \{\par
+        super(name, address, phone);\par
+        this.age = age;\par
+        this.isHead = isHead;\par
+    \}\par
+    \par
+    @Override\par
+    public void display() \{\par
+        System.out.println("Member Details:");\par
+        System.out.println(super.toString());\par
+        System.out.println("Age: " + age);\par
+        \par
+        String cardStatus = "Not Assigned";\par
+        if (cardId != null) \{\par
+            cardStatus = cardId;\par
+        \}\par
+        System.out.println("Card ID: " + cardStatus);\par
+        \par
+        String headStatus = "No";\par
+        if (isHead) \{\par
+            headStatus = "Yes";\par
+        \}\par
+        System.out.println("Family Head: " + headStatus);\par
+    \}\par
+    \par
+    public String getCardId() \{\par
+        return cardId;\par
+    \}\par
+    \par
+    public void setCardId(String cardId) \{\par
+        this.cardId = cardId;\par
+    \}\par
+    \par
+    public int getAge() \{\par
+        return age;\par
+    \}\par
+    \par
+    public void setAge(int age) \{\par
+        this.age = age;\par
+    \}\par
+    \par
+    public boolean isHead() \{\par
+        return isHead;\par
+    \}\par
+    \par
+    public void setHead(boolean isHead) \{\par
+        this.isHead = isHead;\par
+    \}\par
+\par
+
+\qcs32 Card.java0\par
+\qls24
+package ration.model;\par
+import java.util.ArrayList;\par
+import java.util.List;\par
+\par
+public class Card \{\par
+    public static final String TYPE_APL = "APL"; \par
+    public static final String TYPE_BPL = "BPL"; \par
+    public static final String TYPE_AAY = "AAY"; \par
+    \par
+    private String id;\par
+    private String type;\par
+    private int count;\par
+    private List<Ben> members;\par
+    private List<Hist> log;\par
+    \par
+    private static int next = 100001;\par
+    private static int total = 0;\par
+    \par
+    public Card() \{\par
+        id = genId();\par
+        members = new ArrayList<>();\par
+        log = new ArrayList<>();\par
+        count = 0;\par
+        total++;\par
+        addLog("Card created");\par
+    \}\par
+    \par
+    public Card(String type) \{\par
+        this();\par
+        this.type = type;\par
+        addLog("Type set: " + type);\par
+    \}\par
+    \par
+    public void addMember(Ben person) \{\par
+        if (person != null) \{\par
+            person.setCardId(id);  // Fixed: setCardNo -> setCardId\par
+            members.add(person);\par
+            count++;\par
+            addLog("Added: " + person.getName());\par
+        \}\par
+    \}\par
+    \par
+    public void addLog(String act) \{\par
+        log.add(new Hist(act));\par
+    \}\par
+    \par
+    public void showHist() \{\par
+        System.out.println("
+History for " + id + ":");\par
+        for (Hist e : log) \{\par
+            e.show();\par
+        \}\par
+    \}\par
+    \par
+    public void show() \{\par
+        System.out.println("
+----- CARD INFO -----");\par
+        System.out.println("ID: " + id);\par
+        System.out.println("Type: " + type);\par
+        System.out.println("Members: " + count);\par
+        \par
+        System.out.println("
+People:");\par
+        if (members.isEmpty()) \{\par
+            System.out.println("No one added yet");\par
+        \} else \{\par
+            for (Ben p : members) \{\par
+                String tag = "";\par
+                if (p.isHead()) \{  // Fixed: isMain -> isHead\par
+                    tag = " (Main)";\par
+                \}\par
+                System.out.println("- " + p.getName() + tag);\par
+            \}\par
+        \}\par
+    \}\par
+    \par
+    private static String genId() \{\par
+        return "C" + next++;\par
+    \}\par
+    \par
+    public static int getTotal() \{\par
+        return total;\par
+    \}\par
+    \par
+    public class Hist \{\par
+        private String date;\par
+        private String act;\par
+        \par
+        public Hist(String act) \{\par
+            date = java.time.LocalDate.now().toString();\par
+            this.act = act;\par
+        \}\par
+        \par
+        public void show() \{\par
+            System.out.println(date + ": " + act);\par
+        \}\par
+        \par
+        public String getDate() \{\par
+            return date;\par
+        \}\par
+        \par
+        public String getAct() \{\par
+            return act;\par
+        \}\par
+    \}\par
+    \par
+    public String getId() \{\par
+        return id;\par
+    \}\par
+    \par
+    public String getType() \{\par
+        return type;\par
+    \}\par
+    \par
+    public void setType(String type) \{\par
+        this.type = type;\par
+        addLog("Type changed to: " + type);\par
+    \}\par
+    \par
+    public int getCount() \{\par
+        return count;\par
+    \}\par
+    \par
+    public List<Ben> getMembers() \{\par
+        return members;\par
+    \}\par
+\par
+
+\qcs32 Item.java0\par
+\qls24
+package ration.model;\par
+\par
+public class Item \{\par
+    private String id;\par
+    private String name;\par
+    private double price;\par
+    private double qty;\par
+    private String unit;\par
+    \par
+    private static int count = 1;\par
+    \par
+    public Item() \{\par
+        id = genId();\par
+    \}\par
+    \par
+    public Item(String name, double price, double qty, String unit) \{\par
+        id = genId();\par
+        this.name = name;\par
+        this.price = price;\par
+        this.qty = qty;\par
+        this.unit = unit;\par
+    \}\par
+    \par
+    public void update(double add) \{\par
+        qty += add;\par
+    \}\par
+    \par
+    public void update(double newQty, boolean replace) \{\par
+        if (replace) \{\par
+            qty = newQty;\par
+        \} else \{\par
+            update(newQty);\par
+        \}\par
+    \}\par
+    \par
+    public boolean hasEnough(double need) \{\par
+        return qty >= need;\par
+    \}\par
+    \par
+    public boolean reduce(double cut) \{\par
+        if (hasEnough(cut)) \{\par
+            qty -= cut;\par
+            return true;\par
+        \}\par
+        return false;\par
+    \}\par
+    \par
+    public void display() \{\par
+        System.out.println(id + ": " + name);\par
+        System.out.println("Price: Rs. " + price + " per " + unit);\par
+        System.out.println("Stock: " + qty + " " + unit);\par
+    \}\par
+    \par
+    private static String genId() \{\par
+        return "I" + String.format("%03d", count++);\par
+    \}\par
+    \par
+    public String getId() \{\par
+        return id;\par
+    \}\par
+    \par
+    public String getName() \{\par
+        return name;\par
+    \}\par
+    \par
+    public void setName(String n) \{\par
+        name = n;\par
+    \}\par
+    \par
+    public double getPrice() \{\par
+        return price;\par
+    \}\par
+    \par
+    public void setPrice(double p) \{\par
+        price = p;\par
+    \}\par
+    \par
+    public double getQuantity() \{\par
+        return qty;\par
+    \}\par
+    \par
+    public void setQuantity(double q) \{\par
+        qty = q;\par
+    \}\par
+    \par
+    public String getUnit() \{\par
+        return unit;\par
+    \}\par
+    \par
+    public void setUnit(String u) \{\par
+        unit = u;\par
+    \}\par
+    \par
+    @Override\par
+    public String toString() \{\par
+        return id + ": " + name + " - Rs." + price + "/" + unit + " (" + qty + " " + unit + ")";\par
+    \}\par
+\par
+
+\qcs32 Person.java0\par
+\qls24
+package ration.model;\par
+\par
+public abstract class Person \{\par
+    private int id;\par
+    private String name;\par
+    private String addr;\par
+    private String phone;\par
+    \par
+    private static int next = 1000;\par
+    \par
+    public Person() \{\par
+        id = genId();\par
+    \}\par
+    \par
+    public Person(String name, String addr, String phone) \{\par
+        id = genId();\par
+        this.name = name;\par
+        this.addr = addr;\par
+        this.phone = phone;\par
+    \}\par
+    \par
+    public abstract void display();\par
+    \par
+    private static int genId() \{\par
+        return next++;\par
+    \}\par
+    \par
+    public int getId() \{\par
+        return id;\par
+    \}\par
+    \par
+    public String getName() \{\par
+        return name;\par
+    \}\par
+    \par
+    public void setName(String name) \{\par
+        this.name = name;\par
+    \}\par
+    \par
+    public String getAddr() \{\par
+        return addr;\par
+    \}\par
+    \par
+    public void setAddr(String addr) \{\par
+        this.addr = addr;\par
+    \}\par
+    \par
+    public String getPhone() \{\par
+        return phone;\par
+    \}\par
+    \par
+    public void setPhone(String phone) \{\par
+        this.phone = phone;\par
+    \}\par
+    \par
+    @Override\par
+    public String toString() \{\par
+        return "ID: " + id + ", " + name + ", " + addr + ", " + phone;\par
+    \}\par
+\par
+
+\qcs32 Shop.java0\par
+\qls24
+package ration.model;\par
+\par
+public class Shop extends Person \{\par
+    private String sid;\par
+    private String saddr;\par
+    private String lic;\par
+    \par
+    public Shop() \{\par
+        super();\par
+    \}\par
+    \par
+    public Shop(String name, String addr, String phone, String sid, String saddr, String lic) \{\par
+        super(name, addr, phone);\par
+        this.sid = sid;\par
+        this.saddr = saddr;\par
+        this.lic = lic;\par
+    \}\par
+    \par
+    @Override\par
+    public void display() \{\par
+        System.out.println("Shop Owner:");\par
+        System.out.println(super.toString());\par
+        System.out.println("Shop ID: " + sid);\par
+        System.out.println("Shop Addr: " + saddr);\par
+        System.out.println("License: " + lic);\par
+    \}\par
+    \par
+    public String getSid() \{\par
+        return sid;\par
+    \}\par
+    \par
+    public void setSid(String s) \{\par
+        sid = s;\par
+    \}\par
+    \par
+    public String getSaddr() \{\par
+        return saddr;\par
+    \}\par
+    \par
+    public void setSaddr(String s) \{\par
+        saddr = s;\par
+    \}\par
+    \par
+    public String getLic() \{\par
+        return lic;\par
+    \}\par
+    \par
+    public void setLic(String l) \{\par
+        lic = l;\par
+    \}\par
+\par
+
+\qcs32 Tx.java0\par
+\qls24
+package ration.model;\par
+import java.time.LocalDateTime;\par
+import java.time.format.DateTimeFormatter;\par
+import java.time.format.DateTimeParseException;\par
+import java.util.ArrayList;\par
+import java.util.List;\par
+import java.util.stream.Collectors;\par
+\par
+public class Tx \{\par
+    private String id;\par
+    private String card;\par
+    private LocalDateTime date;\par
+    private double total;\par
+    private List<ItemDetail> items; \par
+\par
+    \par
+    public static int count = 10001;\par
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");\par
+\par
+    private Tx(String id, String card, LocalDateTime date, double total) \{\par
+        this.id = id;\par
+        this.card = card;\par
+        this.date = date;\par
+        this.items = new ArrayList<>(); \par
+        this.total = total; \par
+        \par
+        try \{\par
+            int numPart = Integer.parseInt(id.substring(2)); \par
+             if (numPart >= count) \{\par
+                 count = numPart + 1;\par
+             \}\par
+        \} catch (NumberFormatException | IndexOutOfBoundsException e) \{\par
+             System.err.println("Warning: Could not parse transaction ID for counter: " + id);\par
+        \}\par
+    \}\par
+\par
+    \par
+    public Tx(String card) \{\par
+        this.id = genId(); \par
+        this.card = card;\par
+        this.date = LocalDateTime.now();\par
+        this.items = new ArrayList<>();\par
+        this.total = 0.0;\par
+    \}\par
+\par
+    \par
+    public void addItem(String itemId, String itemName, double qty, double price, String unit) \{\par
+        ItemDetail itemDetail = new ItemDetail(itemId, itemName, qty, price, unit);\par
+        items.add(itemDetail);\par
+        recalculateTotal(); \par
+    \}\par
+\par
+     private void recalculateTotal() \{\par
+         this.total = items.stream()\par
+                           .mapToDouble(item -> item.qty * item.price)\par
+                           .sum();\par
+     \}\par
+\par
+    public void display() \{\par
+        System.out.println("
+----- TX INFO -----");\par
+        System.out.println("ID: " + id);\par
+        System.out.println("Card: " + card);\par
+        System.out.println("Date: " + getDateString()); \par
+\par
+        System.out.println("
+Items:");\par
+         if (items.isEmpty()) \{\par
+             System.out.println("No items in this transaction.");\par
+         \} else \{\par
+             for (ItemDetail i : items) \{\par
+                 System.out.println("- " + i.toString());\par
+             \}\par
+         \}\par
+\par
+        System.out.println("
+Total: Rs. " + String.format("%.2f", total));\par
+    \}\par
+\par
+    public String getDateString() \{\par
+        return date.format(DATE_FORMATTER);\par
+    \}\par
+\par
+    \par
+    private static String genId() \{\par
+        return "TX" + count++;\par
+    \}\par
+\par
+    \par
+    public static class ItemDetail \{ \par
+        private String itemId; \par
+        private String name;   \par
+        private double qty;\par
+        private double price;  \par
+        private String unit;\par
+\par
+        \par
+        public ItemDetail(String itemId, String name, double qty, double price, String unit) \{\par
+            this.itemId = itemId;\par
+            this.name = name;\par
+            this.qty = qty;\par
+            this.price = price;\par
+            this.unit = unit;\par
+        \}\par
+\par
+         private ItemDetail(String data) throws IllegalArgumentException \{\par
+             String[] parts = data.split(":"); \par
+             if (parts.length < 5) \{\par
+                 throw new IllegalArgumentException("Invalid Tx ItemDetail format: " + data);\par
+             \}\par
+             try \{\par
+                 this.itemId = parts[0].trim();\par
+                 this.name = parts[1].trim();\par
+                 this.qty = Double.parseDouble(parts[2].trim());\par
+                 this.price = Double.parseDouble(parts[3].trim());\par
+                 this.unit = parts[4].trim();\par
+             \} catch (NumberFormatException | IndexOutOfBoundsException e) \{\par
+                 throw new IllegalArgumentException("Error parsing Tx ItemDetail data: " + data, e);\par
+             \}\par
+         \}\par
+\par
+\par
+        @Override\par
+        public String toString() \{\par
+            // Format for display\par
+            return name + " (" + itemId + "): " + qty + " " + unit + " @ Rs." + String.format("%.2f", price) + " = Rs." +\par
+                   String.format("%.2f", (qty * price));\par
+        \}\par
+\par
+     \par
+        public String toDataString() \{\par
+            return itemId + ":" + name + ":" + qty + ":" + price + ":" + unit;\par
+        \}\par
+\par
+         \par
+         public static ItemDetail fromDataString(String data) throws IllegalArgumentException \{\par
+             return new ItemDetail(data);\par
+         \}\par
+\par
+        public String getItemId() \{ return itemId; \}\par
+        public String getName() \{ return name; \}\par
+        public double getQty() \{ return qty; \}\par
+        public double getPrice() \{ return price; \}\par
+        public String getUnit() \{ return unit; \}\par
+  \par
+    \}\par
+\par
+\par
+    public String getId() \{ return id; \}\par
+    public String getCard() \{ return card; \}\par
+    public LocalDateTime getDateTime() \{ return date; \}\par
+    public double getTotal() \{ return total; \}\par
+    public List<ItemDetail> getItems() \{ return new ArrayList<>(items); \} \par
+ \par
+\par
+    public String toDataString() \{\par
+        String itemDetailsString = items.stream()\par
+                                        .map(ItemDetail::toDataString)\par
+                                        .collect(Collectors.joining(";"));\par
+         if (itemDetailsString.isEmpty()) \{\par
+             itemDetailsString = "NONE";\par
+         \}\par
+        return id + "|" + card + "|" + getDateString() + "|" + itemDetailsString;\par
+    \}\par
+\par
+     public static Tx fromDataString(String data) throws IllegalArgumentException \{\par
+         String[] parts = data.split("\|");\par
+         if (parts.length < 4) \{ \par
+             throw new IllegalArgumentException("Invalid data format for Tx: " + data);\par
+         \}\par
+         try \{\par
+             String id = parts[0].trim();\par
+             String card = parts[1].trim();\par
+             LocalDateTime date = LocalDateTime.parse(parts[2].trim(), DATE_FORMATTER);\par
+             \par
+             \par
+             Tx tx = new Tx(id, card, date, 0.0); \par
+             return tx;\par
+         \} catch (DateTimeParseException | IndexOutOfBoundsException e) \{\par
+             throw new IllegalArgumentException("Error parsing Tx data: " + data, e);\par
+         \}\par
+     \}\par
+\par
+     \par
+     public void setItemDetailsFromString(String itemDetailsString) \{\par
+         items.clear();\par
+         if (itemDetailsString != null && !itemDetailsString.isEmpty() && !itemDetailsString.equalsIgnoreCase("NONE")) \{\par
+             String[] itemDataStrings = itemDetailsString.split(";");\par
+             for (String itemData : itemDataStrings) \{\par
+                 try \{\par
+                     items.add(ItemDetail.fromDataString(itemData));\par
+                 \} catch (IllegalArgumentException e) \{\par
+                     System.err.println("Warning: Skipping invalid item detail in Tx " + this.id + ": " + itemData + " (" + e.getMessage() + ")");\par
+                 \}\par
+             \}\par
+         \}\par
+         recalculateTotal(); \par
+     \}\par
+\par
+}

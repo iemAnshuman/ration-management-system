@@ -1,0 +1,493 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Arial;}}
+
+\qcs32 FileHandler.java0\par
+\qls24
+package ration.utils;\par
+\par
+import ration.model.*;\par
+import ration.service.*;\par
+import ration.utils.RationExceptions;\par
+import java.io.*;\par
+import java.nio.file.*;\par
+import java.util.*;\par
+\par
+public class FileHandler \{\par
+    private static final String DATA_DIR = "data";\par
+    \par
+    static \{\par
+        try \{\par
+            Files.createDirectories(Paths.get(DATA_DIR));\par
+        \} catch (IOException e) \{\par
+            System.err.println("Error creating data directory: " + e.getMessage());\par
+            throw new RuntimeException("Cannot create data directory", e);\par
+        \}\par
+    \}\par
+    \par
+    public static void exportToCSV(CardService cardService, BenSrv benService,\par
+                                InventoryService invService, List<Tx> transactions) \par
+                                throws RationExceptions.IOException \{\par
+        try \{\par
+            exportItems(invService);\par
+            exportBeneficiaries(benService);\par
+            exportCards(cardService);\par
+            exportTransactions(transactions);\par
+            \par
+            System.out.println("Data exported to " + DATA_DIR + " directory");\par
+        \} catch (IOException e) \{\par
+            throw new RationExceptions.IOException("Export failed: " + e.getMessage(), e);\par
+        \}\par
+    \}\par
+    \par
+    public static void importFromCSV(CardService cardService, BenSrv benService,\par
+                                   InventoryService invService, List<Tx> transactions) \par
+                                   throws RationExceptions.IOException \{\par
+        try \{\par
+            importItems(invService);\par
+            importBeneficiaries(benService);\par
+            importCards(cardService, benService);\par
+            importTransactions(transactions, cardService, invService);\par
+            \par
+            System.out.println("Data imported from " + DATA_DIR + " directory");\par
+        \} catch (IOException e) \{\par
+            throw new RationExceptions.IOException("Import failed: " + e.getMessage(), e);\par
+        \}\par
+    \}\par
+    \par
+    private static void exportItems(InventoryService invService) throws IOException \{\par
+        List<String> lines = new ArrayList<>();\par
+        lines.add("id,name,price,quantity,unit");\par
+        \par
+        for (Item item : invService.getAll()) \{\par
+            lines.add(item.getId() + "," + \par
+                    escapeCsv(item.getName()) + "," + \par
+                    item.getPrice() + "," + \par
+                    item.getQuantity() + "," + \par
+                    escapeCsv(item.getUnit()));\par
+        \}\par
+        \par
+        writeFile("items.csv", lines);\par
+    \}\par
+    \par
+    private static void exportBeneficiaries(BenSrv benService) throws IOException \{\par
+        List<String> lines = new ArrayList<>();\par
+        lines.add("id,name,address,phone,age,isHead,cardId");\par
+        \par
+        for (Ben ben : benService.getAll()) \{\par
+            String cardId = ben.getCardId() != null ? ben.getCardId() : "";\par
+            lines.add(ben.getId() + "," + \par
+                    escapeCsv(ben.getName()) + "," + \par
+                    escapeCsv(ben.getAddr()) + "," + \par
+                    escapeCsv(ben.getPhone()) + "," + \par
+                    ben.getAge() + "," + \par
+                    (ben.isHead() ? "1" : "0") + "," + \par
+                    cardId);\par
+        \}\par
+        \par
+        writeFile("beneficiaries.csv", lines);\par
+    \}\par
+    \par
+    private static void exportCards(CardService cardService) throws IOException \{\par
+        \par
+        \par
+        \par
+        \par
+        \par
+        List<String> lines = new ArrayList<>();\par
+        lines.add("id,type,count");\par
+        \par
+        \par
+        \par
+        \par
+        writeFile("cards.csv", lines);\par
+    \}\par
+    \par
+    private static void exportTransactions(List<Tx> transactions) throws IOException \{\par
+        List<String> lines = new ArrayList<>();\par
+        lines.add("id,cardId,date,total");\par
+        \par
+        List<String> itemLines = new ArrayList<>();\par
+        itemLines.add("txId,itemId,itemName,quantity,price,unit");\par
+        \par
+        for (Tx tx : transactions) \{\par
+            lines.add(tx.getId() + "," + \par
+                    tx.getCard() + "," + \par
+                    tx.getDateString() + "," + \par
+                    tx.getTotal());\par
+            \par
+            for (Tx.ItemDetail item : tx.getItems()) \{\par
+                itemLines.add(tx.getId() + "," + \par
+                            item.getItemId() + "," + \par
+                            escapeCsv(item.getName()) + "," + \par
+                            item.getQty() + "," + \par
+                            item.getPrice() + "," + \par
+                            escapeCsv(item.getUnit()));\par
+            \}\par
+        \}\par
+        \par
+        writeFile("transactions.csv", lines);\par
+        writeFile("tx_items.csv", itemLines);\par
+    \}\par
+    \par
+    private static void importItems(InventoryService invService) throws IOException \{\par
+        if (!fileExists("items.csv")) \{\par
+            return;\par
+        \}\par
+        \par
+        List<String> lines = readFile("items.csv");\par
+        boolean header = true;\par
+        \par
+        for (String line : lines) \{\par
+            if (header) \{\par
+                header = false;\par
+                continue;\par
+            \}\par
+            \par
+            try \{\par
+                String[] parts = parseCsvLine(line);\par
+                if (parts.length >= 5) \{\par
+                    String name = parts[1];\par
+                    double price = Double.parseDouble(parts[2]);\par
+                    double qty = Double.parseDouble(parts[3]);\par
+                    String unit = parts[4];\par
+                    \par
+                    invService.add(name, price, qty, unit);\par
+                \}\par
+            \} catch (Exception e) \{\par
+                System.err.println("Error parsing item: " + line);\par
+            \}\par
+        \}\par
+    \}\par
+    \par
+    private static void importBeneficiaries(BenSrv benService) throws IOException \{\par
+        if (!fileExists("beneficiaries.csv")) \{\par
+            return;\par
+        \}\par
+        \par
+        List<String> lines = readFile("beneficiaries.csv");\par
+        boolean header = true;\par
+        \par
+        for (String line : lines) \{\par
+            if (header) \{\par
+                header = false;\par
+                continue;\par
+            \}\par
+            \par
+            try \{\par
+                String[] parts = parseCsvLine(line);\par
+                if (parts.length >= 6) \{\par
+                    String name = parts[1];\par
+                    String addr = parts[2];\par
+                    String phone = parts[3];\par
+                    int age = Integer.parseInt(parts[4]);\par
+                    boolean isHead = "1".equals(parts[5]);\par
+                    \par
+                    benService.add(name, addr, phone, age, isHead);\par
+                \}\par
+            \} catch (Exception e) \{\par
+                System.err.println("Error parsing beneficiary: " + line);\par
+            \}\par
+        \}\par
+    \}\par
+    \par
+    private static void importCards(CardService cardService, BenSrv benService) throws IOException \{\par
+        if (!fileExists("cards.csv")) \{\par
+            return;\par
+        \}\par
+        \par
+        \par
+        \par
+        List<String> lines = readFile("cards.csv");\par
+        boolean header = true;\par
+        \par
+        for (String line : lines) \{\par
+            if (header) \{\par
+                header = false;\par
+                continue;\par
+            \}\par
+            \par
+            try \{\par
+                String[] parts = parseCsvLine(line);\par
+                if (parts.length >= 2) \{\par
+                    String type = parts[1];\par
+                    cardService.newCard(type);\par
+                \}\par
+            \} catch (Exception e) \{\par
+                System.err.println("Error parsing card: " + line);\par
+            \}\par
+        \}\par
+    \}\par
+    \par
+    private static void importTransactions(List<Tx> transactions, CardService cardService, \par
+                                         InventoryService invService) throws IOException \{\par
+        if (!fileExists("transactions.csv") || !fileExists("tx_items.csv")) \{\par
+            return;\par
+        \}\par
+        \par
+        \par
+    \}\par
+    \par
+    private static String escapeCsv(String value) \{\par
+        if (value == null) \{\par
+            return "";\par
+        \}\par
+        \par
+        if (value.contains(",") || value.contains("\"") || value.contains("
+")) \{\par
+            return "\"" + value.replace("\"", "\"\"") + "\"";\par
+        \}\par
+        \par
+        return value;\par
+    \}\par
+    \par
+    private static String[] parseCsvLine(String line) \{\par
+        List<String> tokens = new ArrayList<>();\par
+        StringBuilder sb = new StringBuilder();\par
+        boolean inQuotes = false;\par
+        \par
+        for (int i = 0; i < line.length(); i++) \{\par
+            char c = line.charAt(i);\par
+            \par
+            if (c == '\"') \{\par
+                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '\"') \{\par
+                    sb.append('\"');\par
+                    i++;\par
+                \} else \{\par
+                    inQuotes = !inQuotes;\par
+                \}\par
+            \} else if (c == ',' && !inQuotes) \{\par
+                tokens.add(sb.toString());\par
+                sb.setLength(0);\par
+            \} else \{\par
+                sb.append(c);\par
+            \}\par
+        \}\par
+        \par
+        tokens.add(sb.toString());\par
+        return tokens.toArray(new String[0]);\par
+    \}\par
+    \par
+    private static void writeFile(String filename, List<String> lines) throws IOException \{\par
+        Path path = Paths.get(DATA_DIR, filename);\par
+        Files.write(path, lines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);\par
+    \}\par
+    \par
+    private static List<String> readFile(String filename) throws IOException \{\par
+        Path path = Paths.get(DATA_DIR, filename);\par
+        \par
+        if (!Files.exists(path)) \{\par
+            return new ArrayList<>();\par
+        \}\par
+        \par
+        return Files.readAllLines(path);\par
+    \}\par
+    \par
+    private static boolean fileExists(String filename) \{\par
+        return Files.exists(Paths.get(DATA_DIR, filename));\par
+    \}\par
+\par
+
+\qcs32 RationConstants.java0\par
+\qls24
+package ration.utils;\par
+\par
+/**\par
+ * Constants used throughout the application\par
+ * Demonstrates final class and constants\par
+ */\par
+public final class RationConstants \{\par
+    \par
+    // Private constructor to prevent instantiation\par
+    private RationConstants() \{\}\par
+    \par
+    // Card Category Constants\par
+    public static final String CATEGORY_APL = "APL"; // Above Poverty Line\par
+    public static final String CATEGORY_BPL = "BPL"; // Below Poverty Line\par
+    public static final String CATEGORY_AAY = "AAY"; // Antyodaya Anna Yojana\par
+    \par
+    // Entitlement Constants\par
+    public static final double APL_RICE_KG = 15.0;\par
+    public static final double BPL_RICE_KG = 25.0;\par
+    public static final double AAY_RICE_KG = 35.0;\par
+    \par
+    public static final double APL_WHEAT_KG = 10.0;\par
+    public static final double BPL_WHEAT_KG = 15.0;\par
+    public static final double AAY_WHEAT_KG = 20.0;\par
+    \par
+    public static final double APL_SUGAR_KG = 2.0;\par
+    public static final double BPL_SUGAR_KG = 3.0;\par
+    public static final double AAY_SUGAR_KG = 4.0;\par
+    \par
+    public static final double APL_KEROSENE_LITER = 2.0;\par
+    public static final double BPL_KEROSENE_LITER = 3.0;\par
+    public static final double AAY_KEROSENE_LITER = 5.0;\par
+    \par
+    // Unit Constants\par
+    public static final String UNIT_KG = "kg";\par
+    public static final String UNIT_LITER = "liter";\par
+    public static final String UNIT_PIECE = "piece";\par
+    \par
+    // Menu Option Constants\par
+    public static final int MENU_EXIT = 0;\par
+    public static final int MENU_RATION_CARD = 1;\par
+    public static final int MENU_INVENTORY = 2;\par
+    public static final int MENU_DISTRIBUTION = 3;\par
+    \par
+    // Sub-menu Constants\par
+    public static final int SUBMENU_BACK = 0;\par
+    \par
+    // Ration Card Sub-menu\par
+    public static final int SUBMENU_RC_REGISTER = 1;\par
+    public static final int SUBMENU_RC_ADD_MEMBER = 2;\par
+    public static final int SUBMENU_RC_VIEW_DETAILS = 3;\par
+    \par
+    // Inventory Sub-menu\par
+    public static final int SUBMENU_INV_ADD_ITEM = 1;\par
+    public static final int SUBMENU_INV_UPDATE_ITEM = 2;\par
+    public static final int SUBMENU_INV_VIEW_ITEMS = 3;\par
+    \par
+    // Distribution Sub-menu\par
+    public static final int SUBMENU_DIST_NEW = 1;\par
+    public static final int SUBMENU_DIST_HISTORY = 2;\par
+    \par
+    // Error Messages\par
+    public static final String ERROR_INVALID_OPTION = "Invalid option selected. Please try again.";\par
+    public static final String ERROR_CARD_NOT_FOUND = "Ration card not found with the given number.";\par
+    public static final String ERROR_ITEM_NOT_FOUND = "Item not found with the given ID.";\par
+\par
+
+\qcs32 RationExceptions.java0\par
+\qls24
+package ration.utils;\par
+\par
+public class RationExceptions \{\par
+    public static class CardNotFoundException extends Exception \{\par
+        public CardNotFoundException(String message) \{\par
+            super(message);\par
+        \}\par
+    \}\par
+    \par
+    public static class InventoryException extends Exception \{\par
+        public InventoryException(String message) \{\par
+            super(message);\par
+        \}\par
+    \}\par
+    \par
+    public static class ValidationException extends Exception \{\par
+        public ValidationException(String message) \{\par
+            super(message);\par
+        \}\par
+    \}\par
+    \par
+    public static class DistributionException extends Exception \{\par
+        public DistributionException(String message) \{\par
+            super(message);\par
+        \}\par
+    \}\par
+\par
+    public static class ItemNotFoundException extends Exception \{\par
+        public ItemNotFoundException(String message) \{\par
+            super(message);\par
+        \}\par
+    \}\par
+    \par
+    public static class IOException extends Exception \{\par
+        public IOException(String message) \{\par
+            super(message);\par
+        \}\par
+        \par
+        public IOException(String message, Throwable cause) \{\par
+            super(message, cause);\par
+        \}\par
+    \}\par
+    \par
+    public static class DataFormatException extends Exception \{\par
+        public DataFormatException(String message) \{\par
+            super(message);\par
+        \}\par
+        \par
+        public DataFormatException(String message, Throwable cause) \{\par
+            super(message, cause);\par
+        \}\par
+    \}\par
+\par
+
+\qcs32 ValidationUtils.java0\par
+\qls24
+package ration.utils;\par
+\par
+/**\par
+ * Utility class for validation functions\par
+ * Demonstrates utility class pattern\par
+ */\par
+public final class ValidationUtils \{\par
+    \par
+    // Private constructor to prevent instantiation\par
+    private ValidationUtils() \{\}\par
+    \par
+    /**\par
+     * Validate a phone number (basic validation)\par
+     * @param phoneNumber The phone number to validate\par
+     * @return true if valid, false otherwise\par
+     */\par
+    public static boolean isValidPhoneNumber(String phoneNumber) \{\par
+        if (phoneNumber == null || phoneNumber.trim().isEmpty()) \{\par
+            return false;\par
+        \}\par
+        \par
+        // Basic validation - only digits and length between 10-15\par
+        return phoneNumber.matches("\d\{10,15\}");\par
+    \}\par
+    \par
+    /**\par
+     * Validate card category\par
+     * @param category The category to validate\par
+     * @return true if valid, false otherwise\par
+     */\par
+    public static boolean isValidCategory(String category) \{\par
+        if (category == null) \{\par
+            return false;\par
+        \}\par
+        \par
+        return category.equals(RationConstants.CATEGORY_APL) ||\par
+               category.equals(RationConstants.CATEGORY_BPL) ||\par
+               category.equals(RationConstants.CATEGORY_AAY);\par
+    \}\par
+    \par
+    /**\par
+     * Validate a name (basic validation)\par
+     * @param name The name to validate\par
+     * @return true if valid, false otherwise\par
+     */\par
+    public static boolean isValidName(String name) \{\par
+        return name != null && !name.trim().isEmpty();\par
+    \}\par
+    \par
+    /**\par
+     * Validate age (basic validation)\par
+     * @param age The age to validate\par
+     * @return true if valid, false otherwise\par
+     */\par
+    public static boolean isValidAge(int age) \{\par
+        return age > 0 && age < 120; // Basic range check\par
+    \}\par
+    \par
+    /**\par
+     * Validate price (basic validation)\par
+     * @param price The price to validate\par
+     * @return true if valid, false otherwise\par
+     */\par
+    public static boolean isValidPrice(double price) \{\par
+        return price >= 0;\par
+    \}\par
+    \par
+    /**\par
+     * Validate quantity (basic validation)\par
+     * @param quantity The quantity to validate\par
+     * @return true if valid, false otherwise\par
+     */\par
+    public static boolean isValidQuantity(double quantity) \{\par
+        return quantity >= 0;\par
+    \}\par
+\par
+}

@@ -1,0 +1,7 @@
+id,name,price,quantity,unit
+I002,Wheat,2.0,1000.0,kg
+I001,Rice,3.0,1000.0,kg
+I004,Special Salt,10.0,100.0,kg
+I003,Sugar,15.0,500.0,kg
+I006,Chocolates,100.0,0.0,pic
+I005,Kerosene,20.0,500.0,liter
