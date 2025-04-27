@@ -57,4 +57,6 @@ public class Ben extends Person {
     public void setHead(boolean isHead) {
         this.isHead = isHead;
     }
+
+    public void setId(int id) { super.id = id; }
 }

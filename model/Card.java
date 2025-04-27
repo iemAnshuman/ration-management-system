@@ -2,7 +2,12 @@ package ration.model;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 public class Card {
+    public void setId(String id) { this.id = id; }
+    public void setCount(int count) { this.count = count; }
+
     public static final String TYPE_APL = "APL"; 
     public static final String TYPE_BPL = "BPL"; 
     public static final String TYPE_AAY = "AAY"; 
@@ -121,4 +126,6 @@ public class Card {
     public List<Ben> getMembers() {
         return members;
     }
+
+
 }

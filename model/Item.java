@@ -90,6 +90,8 @@ public class Item {
     public void setUnit(String u) {
         unit = u;
     }
+
+    public void setId(String id) { this.id = id; }
     
     @Override
     public String toString() {

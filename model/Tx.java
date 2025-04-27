@@ -193,4 +193,8 @@ public class Tx {
          }
          recalculateTotal(); 
      }
+
+    public void setId(String id) { this.id = id; }
+    public void setDate(LocalDateTime date) { this.date = date; }
+    public void setTotal(double total) { this.total = total; }
 }

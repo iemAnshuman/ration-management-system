@@ -1,23 +1,28 @@
 package ration.main;
 
-import ration.ui.MainFrame;
 import ration.model.Tx;
 import ration.service.*;
+import ration.utils.DatabaseHandler;
+
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.*;
+
+import ration.ui.MainFrame;
 
 public class RatSys {
 
     public static void main(String[] args) {
-        // Prepare the services
+        // Prepare services
         CardService cardService = new Cards();
         InventoryService inventoryService = new Inventory();
         BenSrv benService = new BenSrvImpl();
         List<Tx> txList = new ArrayList<>();
 
-        // (optional) TODO: load CSV data into services and txList here if you want
+        // Load everything from MySQL
+        DatabaseHandler.loadAll(cardService, benService, inventoryService, txList);
 
+        // Start GUI
         SwingUtilities.invokeLater(() -> {
             MainFrame frame = new MainFrame(cardService, inventoryService, benService, txList);
             frame.setVisible(true);

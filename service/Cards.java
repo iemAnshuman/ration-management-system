@@ -84,4 +84,12 @@ public class Cards implements CardService {
             type.equals(Card.TYPE_AAY)    
         );
     }
+
+    @Override
+    public boolean addCard(Card card) {
+        if (card == null) return false;
+        cards.put(card.getId(), card);
+        return true;
+    }
+
 }

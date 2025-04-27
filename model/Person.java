@@ -1,7 +1,7 @@
 package ration.model;
 
 public abstract class Person {
-    private int id;
+    protected int id;
     private String name;
     private String addr;
     private String phone;
