@@ -10,20 +10,23 @@ public class Cards implements CardService {
     public Cards() {
         this.cards = new HashMap<>();
     }
-    
+
     @Override
     public Card newCard(String type) {
         if (!isValidType(type)) {
             System.out.println("Error: Invalid type. Use APL, BPL, or AAY.");
             return null;
         }
-        
+
         Card card = new Card(type);
-        cards.put(card.getId(), card);  
-        
+        cards.put(card.getId(), card);
+
+        ration.utils.DatabaseHandler.saveCard(card);
+
         return card;
     }
-    
+
+
     @Override
     public boolean addMember(String cardId, Ben person) {  
         Card card = findCard(cardId);

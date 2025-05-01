@@ -18,7 +18,9 @@ public abstract class Person {
         this.addr = addr;
         this.phone = phone;
     }
-    
+
+
+
     public abstract void display();
     
     private static int genId() {

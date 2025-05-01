@@ -3,7 +3,6 @@ package ration.ui;
 import ration.service.CardService;
 import ration.service.InventoryService;
 import ration.service.BenSrv;
-import ration.utils.FileHandler;
 import ration.utils.RationExceptions;
 import ration.model.Tx;
 
@@ -42,26 +41,5 @@ public class MainFrame extends JFrame {
         tabs.addTab("History", new HistoryPanel(txList));
 
         add(tabs, BorderLayout.CENTER);
-    }
-
-    public static void main(String[] args) {
-        // Instantiate services
-        CardService cs = new ration.service.Cards();
-        InventoryService is = new ration.service.Inventory();
-        BenSrv bs = new ration.service.BenSrvImpl();
-        List<Tx> txList = new ArrayList<>();
-
-        // Load existing data
-        try {
-            FileHandler.importFromCSV(cs, bs, is, txList);
-        } catch (RationExceptions.IOException e) {
-            System.err.println("Failed to load data: " + e.getMessage());
-        }
-
-        // Launch GUI
-        SwingUtilities.invokeLater(() -> {
-            MainFrame frame = new MainFrame(cs, is, bs, txList);
-            frame.setVisible(true);
-        });
     }
 }

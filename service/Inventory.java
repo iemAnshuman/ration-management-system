@@ -12,7 +12,6 @@ public class Inventory implements InventoryService {
     
     public Inventory() {
         this.stock = new HashMap<>();
-        setupItems();
     }
     
     @Override
@@ -28,30 +27,33 @@ public class Inventory implements InventoryService {
             }
         }
         
-        stock.put(item.getId(), item);  
+        stock.put(item.getId(), item);
+        ration.utils.DatabaseHandler.saveItem(item);
         return true;
     }
-    
+
     @Override
     public Item add(String name, double price, double qty, String unit) {
         if (name == null || name.trim().isEmpty()) {
             System.out.println("Error: Item name cannot be empty.");
             return null;
         }
-        
+
         for (Item item : stock.values()) {
             if (item.getName().equalsIgnoreCase(name)) {
                 System.out.println("Error: Item with name '" + name + "' already exists.");
                 return null;
             }
         }
-        
+
         Item newItem = new Item(name, price, qty, unit);
-        stock.put(newItem.getId(), newItem);  
-        
+        stock.put(newItem.getId(), newItem);
+        ration.utils.DatabaseHandler.saveItem(newItem); // <-- ADD THIS LINE
+
         return newItem;
     }
-    
+
+
     @Override
     public boolean update(String id, String name, double price, double qty, String unit) {
         Item item = getItem(id);
@@ -75,7 +77,12 @@ public class Inventory implements InventoryService {
         if (unit != null && !unit.trim().isEmpty()) {
             item.setUnit(unit);
         }
-        
+
+        if (item != null) {
+            ration.utils.DatabaseHandler.updateItem(item);
+        }
+
+
         return true;
     }
     
@@ -146,12 +153,5 @@ public class Inventory implements InventoryService {
             System.out.println(item.toString());
         }
     }
-    
-    private void setupItems() {
-        add("Rice", 3.0, 1000.0, "kg");
-        add("Wheat", 2.0, 1000.0, "kg");
-        add("Sugar", 15.0, 500.0, "kg");
-        add("Salt", 5.0, 200.0, "kg");
-        add("Kerosene", 20.0, 500.0, "liter");
-    }
+
 }

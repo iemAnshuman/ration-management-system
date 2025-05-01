@@ -165,20 +165,35 @@ public class DistributionPanel extends JPanel {
     private void finalizeDistribution() {
         String cid = cardIdField.getText().trim();
         Tx tx = new Tx(cid);
-        for (int i=0;i<cartModel.getRowCount();i++) {
-            String id = (String)cartModel.getValueAt(i,0);
-            String name = (String)cartModel.getValueAt(i,1);
-            double q = (double)cartModel.getValueAt(i,2);
-            double price = (double)cartModel.getValueAt(i,3);
-            inventoryService.distribute(id,q);
-            tx.addItem(id,name,q,price,inventoryService.getItem(id).getUnit());
+
+        for (int i = 0; i < cartModel.getRowCount(); i++) {
+            String id = (String) cartModel.getValueAt(i, 0);
+            String name = (String) cartModel.getValueAt(i, 1);
+            double q = (double) cartModel.getValueAt(i, 2);
+            double price = (double) cartModel.getValueAt(i, 3);
+
+            inventoryService.distribute(id, q);  // Update stock
+            tx.addItem(id, name, q, price, inventoryService.getItem(id).getUnit());
         }
-        transactions.add(tx);
+
+        try {
+            ration.utils.DatabaseHandler.saveTransaction(tx);
+            ration.utils.DatabaseHandler.saveTxItems(tx);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Failed to save transaction: " + e.getMessage(),
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+            return;
+        }
+
+        transactions.add(tx); // Keep in memory for session
         historyModel.addRow(new Object[]{tx.getId(), tx.getCard(), tx.getDateString(), tx.getTotal()});
-        JOptionPane.showMessageDialog(this,"Distribution complete: " + tx.getId());
+        JOptionPane.showMessageDialog(this, "Distribution complete: " + tx.getId());
+
         cartModel.setRowCount(0);
         refreshItems();
     }
+
 
     private void showTransactionDetail(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
